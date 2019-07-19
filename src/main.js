@@ -94,16 +94,17 @@
 	SliderTest.prototype.sliderbtnMouseMove = function(e) {
 		if (!this.canMove || !this.mouseDowned) return;
 		var x =  e.clientX || e.pageX,
-			gap = 5;
+			canvasGap = 12, // 小圆半径8 加上小圆阴影偏移量4  不能大于15，如果endCanvas刚好随机到最右侧，moveCanvas将移动不到那个位置
+			btnGap = 5;
 		if (x < this.startX) {
 			this.sliderbtn.style.left = 0;
 			this.moveCanvas.style.left = this.ranX - this.ranEndX + 'px';
-		} else if ((x - this.startX) >= (this.sliderImgWidth - this.sliderbtnWidth - gap)) {
-			this.sliderbtn.style.left = this.sliderImgWidth - this.sliderbtnWidth - gap + 'px';
+		} else if ((x - this.startX) >= (this.sliderImgWidth - this.sliderbtnWidth - btnGap)) {
+			this.sliderbtn.style.left = this.sliderImgWidth - this.sliderbtnWidth - btnGap + 'px';
 		} else {
 			this.sliderbtn.style.left = (x - this.startX) + 'px';
 			var moveCanvasLeft = (this.ranX - this.ranEndX) + (x - this.startX),
-				moveCanvasMaxL = (this.sliderImgWidth - this.ranEndX - this.wh - gap);
+				moveCanvasMaxL = (this.sliderImgWidth - this.ranEndX - this.wh - canvasGap);
 			moveCanvasLeft = moveCanvasLeft >= moveCanvasMaxL ? moveCanvasMaxL : moveCanvasLeft;
 			this.moveCanvas.style.left = moveCanvasLeft + 'px';
 		}
@@ -503,7 +504,7 @@
 		`
 		.slider-test-wrapper {width: 300px; height: 40px; background-image: linear-gradient(180deg, #ffffff 0%,#f3f3f3 100%); position: relative; cursor: pointer; line-height: 38px; font-size: 14px; color: #666; user-select: none;}
 		.slider-test-wrapper-success {display: none; width: 300px; height: 40px; border: 1px solid #26C267; position: absolute; left: 0px; top: 0px; background: #EEFFF5; padding-left: 50px; border-radius: 4px; line-height: 38px; font-size: 14px; color: #26C267; user-select: none; z-index: 9; cursor: initial;}
-		.slider-test-success-status {width: 24px; height: 24px; position: absolute; left: 12px; top: 8px;}
+		.slider-test-success-status {width: 24px; height: 24px; position: absolute; left: 13px; top: 8px;}
 		.slider-test-success-logo, .slider-test-logo {width: 20px; height: 20px; position: absolute; right: 12px; top: 10px;}
 		.slider-test-success-status>img, .slider-test-success-logo>img {width: 100%; height: 100%; display: block; border: 0 none;}
 		.slider-test-wrapper-btn {width: 100%; height: 100%; position: relative; padding: 0 50px; border: 1px solid #ccc; border-radius: 4px;}
@@ -668,5 +669,6 @@
 		return Math.floor((Math.random() * (max - min + 1)) + min);
 	}
 	
+	var SliderTest = window.SliderTest = SliderTest;
 	return SliderTest;
 })));

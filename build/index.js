@@ -3,7 +3,8 @@ const rm = require('rimraf')
 const ora = require('ora');
 const path = require('path')
 const chalk = require('chalk');
-const uglify = require("uglifyjs-webpack-plugin"); 
+// const uglify = require("uglifyjs-webpack-plugin"); 
+const uglify = require("uglifyes-webpack-plugin"); 
 const spinner = ora({
     color: 'green',
     text: 'building to dist/slider-test.min.js ...'
