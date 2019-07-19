@@ -1,0 +1,27 @@
+{
+  "name": "slider-test",
+  "version": "1.0.0",
+  "description": "a using canvas javascript plugin for image slider testing",
+  "main": "dist/slider-test.min.js",
+  "scripts": {
+    "build": "node build/index.js"
+  },
+	"repository": {
+	  "type": "git",
+	  "url": "https://github.com/famoushappy/slider-test.git"
+	},
+  "keywords": [
+    "slider",
+    "image-slider",
+    "slider-test",
+    "slider-testing"
+  ],
+  "author": "famous",
+  "license": "ISC",
+	"devDependencies": {
+	  "chalk": "^2.4.1",
+	  "ora": "^2.1.0",
+	  "rimraf": "^2.6.2",
+	  "webpack": "^4.12.0"
+	}
+}
