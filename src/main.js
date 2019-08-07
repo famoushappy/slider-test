@@ -10,8 +10,10 @@
 	NotSupport.prototype.err = function() {
 		throw new Error( "current environment without a window with a document" );
 	};
-	if (typeof window === 'undefined' || typeof document === 'undefined') //无法通过窗口获取元素的时候
-	return NotSupport;
+	if (typeof window === 'undefined' || typeof document === 'undefined') { //无法通过窗口获取元素的时候
+		var SliderTest = this.SliderTest = NotSupport;
+		return SliderTest;
+	}
 	// not support ------ end
 	
 	function SliderTest(options) {
@@ -185,6 +187,7 @@
 		e.stopPropagation();// 阻止冒泡
 		this.sliderbtn.parentNode.children[0].innerText = '加载中···';
 		this.canMove = false; //不能移动
+		this.closeOrRefresh = false; //按钮开关，禁止
 		var _this = this;
 		this.sliderImg.src = this['img' + this.getRanNum(1, 4)];
 		this.sliderImg.onload = function() {
@@ -195,6 +198,7 @@
 			_this.createEndCanvas();
 			_this.sliderbtn.parentNode.children[0].innerText = '拖动左边滑块完成上方拼图';
 			_this.canMove = true;
+			_this.closeOrRefresh = true; //按钮开关，解除
 		}
 	}
 	// 关闭按钮点击监听

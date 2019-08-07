@@ -1,6 +1,6 @@
 {
   "name": "slider-test",
-  "version": "1.1.0",
+  "version": "1.1.2",
   "description": "a using canvas javascript plugin for image slider testing",
   "main": "dist/slider-test.min.js",
   "scripts": {
