@@ -4,7 +4,7 @@ const ora = require('ora');
 const path = require('path')
 const chalk = require('chalk');
 // const uglify = require("uglifyjs-webpack-plugin"); 
-const uglify = require("uglifyes-webpack-plugin"); 
+const uglify = require("uglifyes-webpack-plugin"); // 可以将ES6语法转为ES5，上面的uglifyjs-webpack-plugin无法做到
 const spinner = ora({
     color: 'green',
     text: 'building to dist/slider-test.min.js ...'

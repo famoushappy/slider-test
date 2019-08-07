@@ -28,13 +28,26 @@
 		this.moveBtnImg = "https://s2.ax1x.com/2019/07/16/Z7cPAI.png";
 		this.closeImg = "https://s2.ax1x.com/2019/07/16/Z7cF4P.png";
 		this.refreshImg = "https://s2.ax1x.com/2019/07/16/Z76onJ.png";
-		this.wrapperBtnText = "加载中···"; // 点击按钮进行验证
+		this.wrapperBtnText = "加载中···"; // 点击按钮在图片加载时显示的文本
 		this.loadedImgCount = 0; // 加载出的图片个数
+		/*
+			options参数说明：
+			必传参数：  	el: 用户传入的element
+						success: 验证成功回调函数
+			可选参数：	width: 创建的点击按钮宽度，默认300
+						height: 创建的点击按钮高度，默认40
+						before: 若需要弹出滑块层之前，进行某些验证，可在options中添加before函数，若要继续弹出return true，反之return false
+						showLogo: 是否显示按钮上右侧logo图标
+						btnText: 创建的点击按钮在图片加载完成时显示的文本，默认为"点击按钮进行验证"
+		*/
 		this.ele = this.getEle(options.el); // 用户传入的element
+		if (!options.hasOwnProperty('showLogo')) options.showLogo = true; //未传入showLogo时，默认显示按钮上右侧logo图标
 		this.options = options;
 		this.opening = false; //是否打开滑块图片, 默认未打开
 		this.canMove = false; //canvas是否可以移动
 		this.closeOrRefresh = true; //关闭、刷新是否可点击
+		this.wrapperWidth = options.width || 300; //创建的点击按钮宽度，默认300
+		this.wrapperHeight = options.height || 40; //创建的点击按钮高度，默认40
 		this.sliderImgWidth = 260; // 滑块背景图宽度
 		this.sliderImgHeight = 160; // 滑块背景图高度
 		this.sliderbtnWidth = 58; // 滑动按钮宽高
@@ -83,6 +96,7 @@
 	}
 	// mousedown
 	SliderTest.prototype.sliderbtnMouseDown = function(e) {
+		e.preventDefault();
 		if (!this.canMove) return;
 		this.mouseDowned = true;
 		this.startX = e.clientX || e.pageX;
@@ -169,6 +183,8 @@
 	SliderTest.prototype.refreshClickListener = function(e) {
 		if (!this.closeOrRefresh) return;
 		e.stopPropagation();// 阻止冒泡
+		this.sliderbtn.parentNode.children[0].innerText = '加载中···';
+		this.canMove = false; //不能移动
 		var _this = this;
 		this.sliderImg.src = this['img' + this.getRanNum(1, 4)];
 		this.sliderImg.onload = function() {
@@ -177,6 +193,8 @@
 			// 创建canvas
 			_this.createMoveCanvas();
 			_this.createEndCanvas();
+			_this.sliderbtn.parentNode.children[0].innerText = '拖动左边滑块完成上方拼图';
+			_this.canMove = true;
 		}
 	}
 	// 关闭按钮点击监听
@@ -197,12 +215,14 @@
 	// wrapperBtn点击监听
 	SliderTest.prototype.wrapperBtnClickListener = function(e) {
 		if ((this.loadedImgCount < this.imgs.length) || this.status) return;
+		// 若需要弹出滑块层之前，进行某些验证，可在options中添加before函数，若要继续弹出return true，反之return false
+		if (this.options.before && !this.options.before()) return;
 		var wrapOffsetL = this.getElePos(this.wrapper).left, //slider-test-wrapper距离页面左侧距离
 			wrapOffsetT = this.getElePos(this.wrapper).top, //slider-test-wrapper距离页面顶部距离
-			offsetX = 48,
-			offsetY = 20,
-			sliderWrapW = 280,
-			sliderWrapH = 286,
+			offsetX = 48, //slider-test-points所占x轴位置
+			offsetY = this.wrapperHeight / 2, //slider-test-points所占y轴位置
+			sliderWrapW = 280, //滑块弹出窗区域宽度
+			sliderWrapH = 286, //滑块弹出窗区域高度
 			margin = 10; // 空隙
 		this.winW = document.documentElement.clientWidth; //浏览器可视区域宽度
 		this.winH = document.documentElement.clientHeight; //浏览器可视区域高度
@@ -420,7 +440,7 @@
 				imgs[i].onload = function(e) {
 					_this.loadedImgCount ++;
 					if (_this.loadedImgCount === imgs.length) {
-						_this.wrapperBtnText = "点击按钮进行验证";
+						_this.wrapperBtnText = _this.options.btnText || "点击按钮进行验证";//传入自定义文本时，使用传入的文本
 						_this.wrapper.querySelector('.slider-test-wrapperbtn-text').innerText = _this.wrapperBtnText;
 					}
 				}
@@ -465,8 +485,8 @@
 									<div class='slider-test-sliderbtn-box slider-test-boxsizing'>
 										<div class='slider-test-sliderbtn-text'>拖动左边滑块完成上方拼图</div>
 										<div class='slider-test-sliderbtn'>
-											<div class='slider-test-ready-img'></div>
-											<div class='slider-test-move-img' style='display: none;'></div>
+											<img src='` + this.readyBtnImg + `' class='slider-test-ready-img' alt='' />
+											<img src='` + this.moveBtnImg + `' class='slider-test-move-img' alt='' style='display: none;' />
 										</div>
 									</div>
 									<div class='slider-test-btns-box slider-test-boxsizing'>
@@ -502,23 +522,24 @@
 	SliderTest.prototype.setStyle = function() {
 		var styleStr = 
 		`
-		.slider-test-wrapper {width: 300px; height: 40px; background-image: linear-gradient(180deg, #ffffff 0%,#f3f3f3 100%); position: relative; cursor: pointer; line-height: 38px; font-size: 14px; color: #666; user-select: none;}
-		.slider-test-wrapper-success {display: none; width: 300px; height: 40px; border: 1px solid #26C267; position: absolute; left: 0px; top: 0px; background: #EEFFF5; padding-left: 50px; border-radius: 4px; line-height: 38px; font-size: 14px; color: #26C267; user-select: none; z-index: 9; cursor: initial;}
-		.slider-test-success-status {width: 24px; height: 24px; position: absolute; left: 13px; top: 8px;}
-		.slider-test-success-logo, .slider-test-logo {width: 20px; height: 20px; position: absolute; right: 12px; top: 10px;}
+		.slider-test-wrapper {width: ` + this.wrapperWidth + `px; height: ` + this.wrapperHeight + `px; background-image: linear-gradient(180deg, #ffffff 0%,#f3f3f3 100%); position: relative; cursor: pointer; line-height: ` + (this.wrapperHeight  - 2) + `px; font-size: 14px; color: #666; user-select: none;}
+		.slider-test-wrapper-success {display: none; width: ` + this.wrapperWidth + `px; height: ` + this.wrapperHeight + `px; border: 1px solid #26C267; position: absolute; left: 0px; top: 0px; background: #EEFFF5; padding-left: 50px;` + (this.options.showLogo ? `padding-right: 44px;` : ``) + ` border-radius: 4px; font-size: 14px; color: #26C267; user-select: none; z-index: 9; cursor: initial;}
+		.slider-test-success-status {width: 24px; height: 24px; position: absolute; left: 13px; top: ` + (this.wrapperHeight - 24)/2 + `px;}
+		.slider-test-success-logo, .slider-test-logo {display: ` + (this.options.showLogo ? `block` : `none`) + `; width: 20px; height: 20px; position: absolute; right: 12px; top: ` + (this.wrapperHeight - 20)/2 + `px;}
+		.slider-test-success-text, .slider-test-wrapperbtn-text {white-space: nowrap;}
 		.slider-test-success-status>img, .slider-test-success-logo>img {width: 100%; height: 100%; display: block; border: 0 none;}
-		.slider-test-wrapper-btn {width: 100%; height: 100%; position: relative; padding: 0 50px; border: 1px solid #ccc; border-radius: 4px;}
+		.slider-test-wrapper-btn {width: 100%; height: 100%; position: relative; padding-left: 50px;` + (this.options.showLogo ? `padding-right: 44px;` : ``) + ` border: 1px solid #ccc; border-radius: 4px;}
 		.slider-test-wrapper-btn:hover {background-image: linear-gradient(0deg, #ffffff 0%,#f3f3f3 100%);} 
 		.slider-test-wrapper-btn:hover .slider-test-radar .slider-test-sector, .slider-test-wrapper-btn:hover .slider-test-radar .slider-test-ring {display: none;}
 		.slider-test-boxsizing {box-sizing: border-box;} 
-		.slider-test-radar {position: absolute; left: 10px; top: 4px; width: 30px; height: 30px; border-radius: 50%;}
+		.slider-test-radar {position: absolute; left: 10px; top: ` + (this.wrapperHeight - 30 - 2)/2 + `px; width: 30px; height: 30px; border-radius: 50%;}
 		.slider-test-infinity, .slider-test-ring {width: 30px; height: 30px; border: 1px solid #3873ff; border-radius: 50%; background: #C6D5F8; position: absolute; left: 0; top: 0;}
 		.slider-test-infinity {animation: scale 1s ease 0s infinite;}
 		.slider-test-sector {width: 30px; height: 30px; position: absolute; left: 0; top: 0; background-color: #80A6FC; border: 1px solid #3873ff; border-radius: 50%; background-image: linear-gradient(115deg, rgba(0,0,0,0) 50%,#c6d5f8 50%),linear-gradient(65deg, #c6d5f8 50%,rgba(0,0,0,0) 50%);}
 		.slider-test-dot {width: 12px; height: 12px; background: #3873ff; border-radius: 50%; position: absolute; left: 9px; top: 9px;}
 		.slider-test-logo>img {width: 100%; height: 100%; display: block; border: 0 none;}
 		.slider-test-show {cursor: default; width: 0; height: 0; position: absolute; left: 0; top: 0; z-index: 999;}
-		.slider-test-points {font-size: 45px; line-height: 0.75; width: 48px; height: 38px; position: absolute; left: 1px; top: 1px; background: #efefef; color: #666; text-align: center;}
+		.slider-test-points {font-size: 45px; line-height: ` + (this.wrapperHeight - 2 - 4) + `px; width: 48px; height: ` + (this.wrapperHeight - 2) + `px; position: absolute; left: 1px; top: 1px; background: #efefef; color: #666; text-align: center;}
 		.slider-test-slider-window {position: fixed; left: 10000px; top: 10000px; width: 0; height: 0;}
 		.slider-test-ghost {position: fixed; width: 100%; height: 100%; left: 0; top: 0; background: transparent;}
 		.slider-test-slider-wrap {width: 280px; height: 286px; padding-top: 10px; background-color: #fff; box-shadow: 0 0 10px #ccc; border: 1px solid #ccc; position: absolute; left: 0; top: 0; margin-top: -143px;}
@@ -527,12 +548,11 @@
 		.slider-test-canvas {position: absolute; left: 0; top: 0;}
 		.slider-test-canvas-move { z-index: 999;}
 		.slider-test-canvas-end { z-index: 99;}
-		.slider-test-sliderbtn-box {width: 260px; height: 38px; position: relative; margin: 15px auto; background: #efefef; border-radius: 19px; box-shadow: inset 0 0 4px #ccc; padding-left: 65px; color: #88949d; user-select: none;}
+		.slider-test-sliderbtn-box {width: 260px; height: 38px; line-height: 38px; position: relative; margin: 15px auto; background: #efefef; border-radius: 19px; box-shadow: inset 0 0 4px #ccc; padding-left: 65px; color: #88949d; user-select: none;}
 		.slider-test-sliderbtn-text {opacity: 1; transition: opacity .3s;}
 		.slider-test-sliderbtn {position: absolute; left: 0; top: -10px; width: 58px; height: 58px; cursor: pointer;}
 		.slider-test-sliderbtn>div {position: absolute; left: 0; top: 0; width: 100%; height: 100%;}
-		.slider-test-ready-img {background: url('` + this.readyBtnImg + `') no-repeat center/100% 100%;}
-		.slider-test-move-img {background: url('` + this.moveBtnImg + `') no-repeat center/100% 100%;}
+		.slider-test-ready-img, .slider-test-move-img {width: 100%; height: 100%; display: block;}
 		.slider-test-btns-box {width: 100%; height: 48px; border-top: 1px solid #eee; line-height: 48px; padding-left: 15px; cursor: default;}
 		.slider-test-btns-box>img {width: 20px; height: 20px; margin: 0 5px; vertical-align: text-bottom; cursor: pointer;}
 		.slider-test-btns-box>img.slider-test-refresh {width: 18px; height: 18px;}

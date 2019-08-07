@@ -5,13 +5,23 @@
 		<title>slider-testing</title>
 	</head>
 	<body>
-		<div id="slider-test" style="margin-left: 600px; padding: 2000px 0;"></div>
+		<div id="slider-test" style="margin-left: 600px; padding: 2000px 0 200px;"></div>
 		<button type="button" onclick="btnClick()">重置</button>
+		<input type="text" name="" id="input" value="" />
 		<script src="./src/main.js" type="text/javascript" charset="utf-8"></script>
 		<!-- <script src="./dist/slider-test.min.js" type="text/javascript" charset="utf-8"></script> -->
 		<script type="text/javascript">
 			var sliderTest = new SliderTest({
 				el: '#slider-test',
+				showLogo: false,
+				btnText: '获取验证码',
+				width: 200,
+				before: function() {
+					// var val = document.getElementById("input").value;
+					// if (val) return true;
+					// return false;
+					return true;
+				},
 				success: function() {
 					console.log('success');
 				}
